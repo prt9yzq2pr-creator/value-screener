@@ -3,8 +3,11 @@
 Screener de value investing sobre las 500 mayores cotizadas de EE.UU. más el
 Russell 2000 (~2.400 empresas), con datos oficiales de SEC EDGAR (XBRL).
 
-**Ranking web**: publicado con GitHub Pages desde `docs/`, actualizado
-automáticamente cada lunes por GitHub Actions.
+**Ranking web**: publicado con GitHub Pages desde `docs/`.
+
+**Actualización**: la SEC bloquea las IPs de los centros de datos (incluido
+GitHub Actions), así que el refresco corre en local con `./actualizar.sh`
+(refresca EDGAR, regenera la web y hace push; GitHub Pages republica solo).
 
 - Ranking Magic Formula (Greenblatt) con filtros de calidad (deuda, cobertura
   de intereses, ROIC, FCF, Piotroski).

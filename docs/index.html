@@ -30,6 +30,8 @@
   .controls { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
   input[type=search] { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
          background: var(--card); color: var(--text); width: 260px; max-width: 100%; }
+  select { padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px;
+         background: var(--card); color: var(--text); }
   label.chk { display: flex; gap: 6px; align-items: center; color: var(--muted); cursor: pointer; }
   .n { color: var(--muted); font-size: .85rem; margin-left: auto; }
   .tblwrap { overflow-x: auto; background: var(--card); border: 1px solid var(--border);
@@ -50,6 +52,12 @@
   .foot { margin-top: 22px; color: var(--muted); font-size: .82rem; max-width: 800px; }
   .foot b { color: var(--text); }
   .arrow { font-size: .7rem; }
+  .corta-nota { background: var(--ok-bg); border: 1px solid var(--ok); border-radius: 10px;
+                padding: 10px 14px; font-size: .86rem; margin: 0 0 14px; }
+  .leyenda { margin: 0 0 14px; font-size: .86rem; color: var(--muted); }
+  .leyenda summary { cursor: pointer; color: var(--accent); }
+  .leyenda ul { margin: 8px 0 0; padding-left: 18px; }
+  .leyenda li { margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -60,13 +68,47 @@
   <div class="tabs">
     <button class="tab on" id="tabG">General (Magic Formula)</button>
     <button class="tab" id="tabF">Financieras</button>
+    <button class="tab" id="tabL">⭐ Lista corta</button>
   </div>
 
   <div class="controls">
     <input type="search" id="q" placeholder="Buscar ticker o nombre…">
+    <select id="uni">
+      <option value="">Todos los universos</option>
+      <option value="top500">Top 500 (grandes)</option>
+      <option value="russell">Russell 2000 (small caps)</option>
+    </select>
     <label class="chk"><input type="checkbox" id="soloAptas"> solo las que pasan filtros</label>
     <span class="n" id="count"></span>
   </div>
+
+  <p class="corta-nota" id="cortaNota" style="display:none">
+    <b>Lista corta</b>: empresas que pasan todos los filtros de calidad y además cumplen
+    Piotroski ≥ 7, FCF yield &gt; 8% y EV/EBIT &lt; 10. Es el embudo más exigente del
+    screener: barato de verdad, generando caja de verdad y con fundamentales mejorando.
+    Punto de partida para el análisis manual, no una lista de compra.
+  </p>
+
+  <details class="leyenda">
+    <summary>¿Qué significa cada columna?</summary>
+    <ul>
+      <li><b>#</b> — posición en el ranking (menor = mejor combinación de barato y rentable).</li>
+      <li><b>Capitalización</b> — lo que vale la empresa en bolsa (precio × nº de acciones). M$ = millones, MM$ = miles de millones, T$ = billones.</li>
+      <li><b>EV/EBIT</b> — precio de toda la empresa (incluyendo su deuda) dividido por su beneficio operativo anual. Cuanto más bajo, más barata. Menos de 10 suele considerarse barato.</li>
+      <li><b>ROIC</b> — rentabilidad que saca la empresa al capital que tiene invertido. Más de 15% indica buen negocio. (Con patrimonio negativo por recompras el número se distorsiona: ignóralo en esos casos.)</li>
+      <li><b>FCF yield</b> — caja libre que genera al año (cobros menos pagos e inversiones) dividida por su precio en bolsa. Es el "interés" real que rinde la empresa; más de 8% es mucho.</li>
+      <li><b>E. yield</b> — beneficio operativo dividido por el valor total de la empresa; la vara de medir de "barato" en la Magic Formula.</li>
+      <li><b>PER</b> — precio dividido por beneficio neto: cuántos años de beneficio cuesta la empresa.</li>
+      <li><b>P/B</b> — precio dividido por valor contable (lo que dice el balance que valen sus activos menos deudas).</li>
+      <li><b>DN/EBITDA</b> — deuda neta dividida por EBITDA: años de beneficio bruto que tardaría en pagar su deuda. Más de 4 es demasiada deuda.</li>
+      <li><b>Piotroski</b> — test de 9 señales de salud financiera comparando con el año anterior (beneficio, caja, deuda, márgenes...). 7-9 = mejorando; 0-4 = deteriorándose.</li>
+      <li><b>Filtros</b> — verde si pasa todos los filtros de calidad; si pone "no", pasa el ratón por encima para ver el motivo.</li>
+      <li><b>ROE</b> (financieras) — beneficio dividido por el capital de los accionistas; la rentabilidad básica de un banco o aseguradora. Más de 10-12% es bueno.</li>
+      <li><b>ROA</b> (financieras) — beneficio sobre activos totales; en banca, más de 1% es sólido.</li>
+      <li><b>Cap/Activos</b> (financieras) — colchón de capital sobre el total del balance; menos de 4% es un banco frágil.</li>
+      <li><b>Score</b> (financieras) — test propio de 6 señales: beneficio positivo, ROE &gt; 10%, ROA &gt; 0,7%, capital &gt; 5%, rentabilidad mejorando y sin diluir al accionista.</li>
+    </ul>
+  </details>
 
   <div class="tblwrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
 
@@ -87,21 +129,52 @@
 const PCT = v => v == null ? 'n/d' : (v * 100).toFixed(1) + '%';
 const NUM = v => v == null ? 'n/d' : v.toFixed(2);
 const INT = v => v == null ? 'n/d' : String(v);
+const CAP = v => v == null ? 'n/d'
+  : v >= 1e12 ? (v / 1e12).toFixed(2) + ' B$'.replace('B', 'T')
+  : v >= 1e9 ? (v / 1e9).toFixed(1) + ' MM$'
+  : (v / 1e6).toFixed(0) + ' M$';
+
+const TIPS = {
+  rank: 'Posición en el ranking: menor = mejor combinación de barato y rentable',
+  ticker: 'Símbolo de cotización en bolsa',
+  nombre: 'Nombre de la empresa',
+  cap: 'Valor en bolsa (precio × acciones). M$=millones, MM$=miles de millones, T$=billones',
+  ev_ebit: 'Precio de toda la empresa (con deuda) / beneficio operativo. Más bajo = más barata',
+  roic: 'Rentabilidad sobre el capital invertido. Más de 15% = buen negocio',
+  fcf_yield: 'Caja libre anual / precio en bolsa: el "interés" real que rinde',
+  earnings_yield: 'Beneficio operativo / valor total: la vara de "barato" de la Magic Formula',
+  per: 'Precio / beneficio neto: años de beneficio que cuesta la empresa',
+  pb: 'Precio / valor contable del patrimonio',
+  deuda_ebitda: 'Deuda neta / EBITDA: años que tardaría en pagar su deuda. Más de 4 = demasiada',
+  piotroski: 'Test de 9 señales de salud financiera vs. año anterior. 7-9 = mejorando',
+  apta: 'Pasa o no los filtros de calidad; en "no", pasa el ratón para ver el motivo',
+  roe: 'Beneficio / capital de los accionistas. Más de 10-12% es bueno en financieras',
+  roa: 'Beneficio / activos totales. En banca, más de 1% es sólido',
+  capital_activos: 'Colchón de capital sobre el balance. Menos de 4% = banco frágil',
+  score: 'Test propio de 6 señales para financieras (rentabilidad, solvencia, mejora)',
+};
 
 const COLS = {
   general: [
     ['rank', '#', INT], ['ticker', 'Ticker', null], ['nombre', 'Nombre', null],
+    ['cap', 'Capitalización', CAP],
     ['ev_ebit', 'EV/EBIT', NUM], ['roic', 'ROIC', PCT], ['fcf_yield', 'FCF yield', PCT],
     ['earnings_yield', 'E. yield', PCT], ['per', 'PER', NUM], ['pb', 'P/B', NUM],
     ['deuda_ebitda', 'DN/EBITDA', NUM], ['piotroski', 'Piotroski', INT], ['apta', 'Filtros', null],
   ],
   financieras: [
     ['rank', '#', INT], ['ticker', 'Ticker', null], ['nombre', 'Nombre', null],
+    ['cap', 'Capitalización', CAP],
     ['per', 'PER', NUM], ['pb', 'P/B', NUM], ['roe', 'ROE', PCT], ['roa', 'ROA', PCT],
     ['capital_activos', 'Cap/Activos', PCT], ['score', 'Score', v => v == null ? 'n/d' : v + '/6'],
     ['apta', 'Filtros', null],
   ],
 };
+COLS.corta = COLS.general;
+
+const esCorta = r => r.apta && r.piotroski != null && r.piotroski >= 7 &&
+                     r.fcf_yield != null && r.fcf_yield > 0.08 &&
+                     r.ev_ebit != null && r.ev_ebit < 10;
 
 let DATA = null, vista = 'general', sortKey = 'rank', sortAsc = true;
 
@@ -117,9 +190,12 @@ function render() {
   const cols = COLS[vista];
   const q = document.getElementById('q').value.trim().toLowerCase();
   const solo = document.getElementById('soloAptas').checked;
+  const uni = document.getElementById('uni').value;
 
-  let rows = DATA[vista].filter(r =>
+  const base = vista === 'corta' ? DATA.general.filter(esCorta) : DATA[vista];
+  let rows = base.filter(r =>
     (!solo || r.apta) &&
+    (!uni || r.grupo === uni) &&
     (!q || r.ticker.toLowerCase().includes(q) || r.nombre.toLowerCase().includes(q)));
 
   rows.sort((a, b) => {
@@ -132,7 +208,7 @@ function render() {
 
   const thead = document.querySelector('#tbl thead');
   thead.innerHTML = '<tr>' + cols.map(([k, lbl]) =>
-    `<th data-k="${k}">${lbl}${k === sortKey ? `<span class="arrow"> ${sortAsc ? '▲' : '▼'}</span>` : ''}</th>`
+    `<th data-k="${k}" title="${TIPS[k] || ''}">${lbl}${k === sortKey ? `<span class="arrow"> ${sortAsc ? '▲' : '▼'}</span>` : ''}</th>`
   ).join('') + '</tr>';
   thead.querySelectorAll('th').forEach(th => th.onclick = () => {
     const k = th.dataset.k;
@@ -156,14 +232,18 @@ function render() {
 
 document.getElementById('tabG').onclick = () => setVista('general');
 document.getElementById('tabF').onclick = () => setVista('financieras');
+document.getElementById('tabL').onclick = () => setVista('corta');
 function setVista(v) {
   vista = v; sortKey = 'rank'; sortAsc = true;
   document.getElementById('tabG').classList.toggle('on', v === 'general');
   document.getElementById('tabF').classList.toggle('on', v === 'financieras');
+  document.getElementById('tabL').classList.toggle('on', v === 'corta');
+  document.getElementById('cortaNota').style.display = v === 'corta' ? 'block' : 'none';
   render();
 }
 document.getElementById('q').oninput = render;
 document.getElementById('soloAptas').onchange = render;
+document.getElementById('uni').onchange = render;
 </script>
 </body>
 </html>

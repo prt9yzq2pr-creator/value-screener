@@ -182,6 +182,7 @@ class Metrics:
     fcf_conversion: Optional[float] = None
     piotroski: Optional[int] = None
     magic_rank: Optional[int] = None
+    market_cap: Optional[float] = None
     # --- solo financieras ---
     is_financial: bool = False
     roa: Optional[float] = None
@@ -200,6 +201,7 @@ def compute_metrics(c: Company) -> Metrics:
     greenblatt_base = max(y.current_assets - y.current_liabilities, 0) + y.net_fixed_assets
 
     m = Metrics(ticker=c.ticker, name=c.name)
+    m.market_cap = c.market_cap
     m.per = _safe_div(c.market_cap, y.net_income)
     m.pb = _safe_div(c.market_cap, y.equity)
     m.ev_ebit = _safe_div(ev, y.ebit)
@@ -225,6 +227,7 @@ def compute_financial_metrics(c: Company) -> Metrics:
     significativos; se evaluan por rentabilidad sobre activos y capital."""
     y = c.latest
     m = Metrics(ticker=c.ticker, name=c.name, is_financial=True)
+    m.market_cap = c.market_cap
     m.per = _safe_div(c.market_cap, y.net_income)
     m.pb = _safe_div(c.market_cap, y.equity)
     m.roe = _safe_div(y.net_income, y.equity)
