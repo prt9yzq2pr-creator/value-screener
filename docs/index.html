@@ -122,6 +122,8 @@
 const T = {
 es: {
   titulo: 'Value Screener — EE.UU.',
+  docTitle: 'Value Screener — Ranking EE.UU.',
+  nd: 'n/d',
   sub: (n, f) => `${n} empresas con métricas · actualizado ${f}`,
   tabG: 'General (Magic Formula)', tabF: 'Financieras', tabL: '⭐ Lista corta',
   buscar: 'Buscar ticker o nombre…',
@@ -195,6 +197,8 @@ es: {
 },
 en: {
   titulo: 'Value Screener — USA',
+  docTitle: 'Value Screener — US Ranking',
+  nd: 'n/a',
   sub: (n, f) => `${n} companies with metrics · updated ${f}`,
   tabG: 'General (Magic Formula)', tabF: 'Financials', tabL: '⭐ Shortlist',
   buscar: 'Search ticker or name…',
@@ -211,11 +215,11 @@ en: {
     rank: 'Ranking position: lower = better mix of cheap and profitable',
     ticker: 'Trading symbol; the link opens its Yahoo Finance page',
     nombre: 'Company name',
-    cap: 'Market value (price × shares outstanding)',
+    cap: 'Market value (price × shares outstanding). $M=millions, $B=billions, $T=trillions',
     ev_ebit: 'Whole-company price (debt included) / operating profit. Lower = cheaper',
     roic: 'Return on invested capital. Above 15% = good business',
     fcf_yield: 'Annual free cash flow / market cap: the real "interest rate" it earns you',
-    earnings_yield: 'Operating profit / enterprise value: the Magic Formula measure of cheap',
+    earnings_yield: 'Operating profit / enterprise value: the Magic Formula’s yardstick for "cheap"',
     per: 'Price / net income: years of earnings you pay for the company',
     pb: 'Price / book value of equity',
     deuda_ebitda: 'Net debt / EBITDA: years needed to repay its debt. Above 4 = too much',
@@ -269,10 +273,28 @@ en: {
 let lang = localStorage.getItem('vs_lang') || 'es';
 let DATA = null, vista = 'general', sortKey = 'rank', sortAsc = true;
 
-const PCT = v => v == null ? 'n/d' : (v * 100).toFixed(1) + '%';
-const NUM = v => v == null ? 'n/d' : v.toFixed(2);
-const INT = v => v == null ? 'n/d' : String(v);
-const CAP = v => v == null ? 'n/d' : T[lang].cap(v);
+const ND = () => T[lang].nd;
+const PCT = v => v == null ? ND() : (v * 100).toFixed(1) + '%';
+const NUM = v => v == null ? ND() : v.toFixed(2);
+const INT = v => v == null ? ND() : String(v);
+const CAP = v => v == null ? ND() : T[lang].cap(v);
+
+// Los motivos de descarte vienen de los datos en español; en modo ingles
+// se traducen aqui por patron (los textos son fijos, solo varia la cifra).
+const RAZON_EN = [
+  ['deuda neta/EBITDA alta', 'high net debt/EBITDA'],
+  ['cobertura de intereses baja', 'low interest coverage'],
+  ['ROIC bajo', 'low ROIC'],
+  ['FCF negativo', 'negative FCF'],
+  ['Piotroski debil', 'weak Piotroski'],
+  ['perdidas', 'losses'],
+  ['ROE bajo', 'low ROE'],
+  ['capital debil', 'weak capital'],
+  ['score financiero debil', 'weak financial score'],
+  ['sobre activos', 'of assets'],
+];
+const trRazon = s => lang === 'es' ? s
+  : RAZON_EN.reduce((acc, [es, en]) => acc.replace(es, en), s);
 
 const COLKEYS = {
   general: [['rank', INT], ['ticker', null], ['nombre', null], ['cap', CAP],
@@ -280,7 +302,7 @@ const COLKEYS = {
     ['per', NUM], ['pb', NUM], ['deuda_ebitda', NUM], ['piotroski', INT], ['apta', null]],
   financieras: [['rank', INT], ['ticker', null], ['nombre', null], ['cap', CAP],
     ['per', NUM], ['pb', NUM], ['roe', PCT], ['roa', PCT], ['capital_activos', PCT],
-    ['score', v => v == null ? 'n/d' : v + '/6'], ['apta', null]],
+    ['score', v => v == null ? ND() : v + '/6'], ['apta', null]],
 };
 COLKEYS.corta = COLKEYS.general;
 
@@ -291,6 +313,7 @@ const esCorta = r => r.apta && r.piotroski != null && r.piotroski >= 7 &&
 function applyLang() {
   const t = T[lang];
   document.documentElement.lang = lang;
+  document.title = t.docTitle;
   document.getElementById('titulo').textContent = t.titulo;
   document.getElementById('avisoLink').textContent = t.avisoLink;
   document.getElementById('langBtn').textContent = lang === 'es' ? 'EN' : 'ES';
@@ -354,7 +377,7 @@ function render() {
       if (k === 'nombre') return `<td class="nm" title="${r.nombre}">${r.nombre}</td>`;
       if (k === 'apta') return r.apta
         ? `<td style="text-align:center"><span class="badge si">${t.pasa}</span></td>`
-        : `<td style="text-align:center"><span class="badge no" title="${(r.razones || []).join('; ')}">${t.noPasa}</span></td>`;
+        : `<td style="text-align:center"><span class="badge no" title="${(r.razones || []).map(trRazon).join('; ')}">${t.noPasa}</span></td>`;
       return `<td>${fmt(r[k])}</td>`;
     }).join('') + '</tr>').join('');
 
