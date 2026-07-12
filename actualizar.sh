@@ -1,6 +1,6 @@
 #!/bin/zsh
-# Actualizacion semanal del value screener: refresca datos de EDGAR,
-# regenera la web y publica en GitHub Pages.
+# Actualizacion semestral del value screener (15 ene / 15 jul via launchd):
+# refresca datos de EDGAR, regenera la web y publica en GitHub Pages.
 # La SEC bloquea las IPs de la nube (GitHub Actions), asi que este ciclo
 # tiene que ejecutarse desde una IP residencial (este Mac).
 
@@ -16,7 +16,7 @@ echo "=== $(date) Actualizando value screener ==="
 python3 build_site.py
 
 git add universe_metrics.json docs/data.json ranking_completo.csv cartera.json
-git commit -m "Actualizacion semanal del ranking" || { echo "Sin cambios"; exit 0; }
+git commit -m "Actualizacion semestral del ranking" || { echo "Sin cambios"; exit 0; }
 git push
 
 echo "=== $(date) Publicado ==="
