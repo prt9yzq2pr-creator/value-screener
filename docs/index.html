@@ -45,6 +45,8 @@
   tbody tr { border-top: 1px solid var(--border); }
   tbody tr.apta { background: var(--ok-bg); }
   td.tk { font-weight: 600; }
+  td.tk a { color: var(--accent); text-decoration: none; }
+  td.tk a:hover { text-decoration: underline; }
   td.nm { max-width: 240px; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
   .badge { font-size: .78rem; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
   .badge.si { color: var(--ok); background: transparent; border: 1px solid var(--ok); }
@@ -219,7 +221,7 @@ function render() {
   const tbody = document.querySelector('#tbl tbody');
   tbody.innerHTML = rows.map(r => '<tr class="' + (r.apta ? 'apta' : '') + '">' +
     cols.map(([k, , fmt]) => {
-      if (k === 'ticker') return `<td class="tk">${r.ticker}</td>`;
+      if (k === 'ticker') return `<td class="tk"><a href="https://finance.yahoo.com/quote/${encodeURIComponent(r.ticker)}" target="_blank" rel="noopener">${r.ticker}</a></td>`;
       if (k === 'nombre') return `<td class="nm" title="${r.nombre}">${r.nombre}</td>`;
       if (k === 'apta') return r.apta
         ? '<td style="text-align:center"><span class="badge si">pasa</span></td>'
