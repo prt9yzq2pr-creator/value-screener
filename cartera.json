@@ -1,0 +1,181 @@
+{
+ "creada": "2026-07-12",
+ "posiciones": [
+  {
+   "ticker": "GPI",
+   "nombre": "GROUP 1 AUTOMOTIVE INC",
+   "entrada": "2026-07-12",
+   "rank_entrada": 4,
+   "precio_entrada": 288.39
+  },
+  {
+   "ticker": "AREN",
+   "nombre": "Arena Group Holdings, Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 5,
+   "precio_entrada": 0.85
+  },
+  {
+   "ticker": "REPX",
+   "nombre": "Riley Exploration Permian, Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 7,
+   "precio_entrada": 32.51
+  },
+  {
+   "ticker": "BTMD",
+   "nombre": "biote Corp.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 8,
+   "precio_entrada": 2.17
+  },
+  {
+   "ticker": "VLGEA",
+   "nombre": "VILLAGE SUPER MARKET INC",
+   "entrada": "2026-07-12",
+   "rank_entrada": 9,
+   "precio_entrada": 42.34
+  },
+  {
+   "ticker": "CMRE",
+   "nombre": "Costamare Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 10,
+   "precio_entrada": 14.26
+  },
+  {
+   "ticker": "DFIN",
+   "nombre": "Donnelley Financial Solutions, Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 11,
+   "precio_entrada": 46.21
+  },
+  {
+   "ticker": "PRG",
+   "nombre": "PROG Holdings, Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 14,
+   "precio_entrada": 44.13
+  },
+  {
+   "ticker": "ADBE",
+   "nombre": "ADOBE INC.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 17,
+   "precio_entrada": 219.72
+  },
+  {
+   "ticker": "RIGL",
+   "nombre": "RIGEL PHARMACEUTICALS INC",
+   "entrada": "2026-07-12",
+   "rank_entrada": 19,
+   "precio_entrada": 38.72
+  },
+  {
+   "ticker": "JILL",
+   "nombre": "J.Jill, Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 20,
+   "precio_entrada": 16.49
+  },
+  {
+   "ticker": "CRMD",
+   "nombre": "CorMedix Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 21,
+   "precio_entrada": 8.75
+  },
+  {
+   "ticker": "MPC",
+   "nombre": "Marathon Petroleum Corp",
+   "entrada": "2026-07-12",
+   "rank_entrada": 23,
+   "precio_entrada": 266.35
+  },
+  {
+   "ticker": "ACN",
+   "nombre": "Accenture plc",
+   "entrada": "2026-07-12",
+   "rank_entrada": 25,
+   "precio_entrada": 137.35
+  },
+  {
+   "ticker": "MGY",
+   "nombre": "Magnolia Oil & Gas Corp",
+   "entrada": "2026-07-12",
+   "rank_entrada": 27,
+   "precio_entrada": 25.2
+  },
+  {
+   "ticker": "MMS",
+   "nombre": "MAXIMUS, INC.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 28,
+   "precio_entrada": 55.75
+  },
+  {
+   "ticker": "PARR",
+   "nombre": "PAR PACIFIC HOLDINGS, INC.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 29,
+   "precio_entrada": 58.49
+  },
+  {
+   "ticker": "SD",
+   "nombre": "SANDRIDGE ENERGY INC",
+   "entrada": "2026-07-12",
+   "rank_entrada": 31,
+   "precio_entrada": 13.24
+  },
+  {
+   "ticker": "CALM",
+   "nombre": "CAL-MAINE FOODS INC",
+   "entrada": "2026-07-12",
+   "rank_entrada": 32,
+   "precio_entrada": 83.85
+  },
+  {
+   "ticker": "SPOK",
+   "nombre": "Spok Holdings, Inc",
+   "entrada": "2026-07-12",
+   "rank_entrada": 35,
+   "precio_entrada": 10.49
+  },
+  {
+   "ticker": "CCSI",
+   "nombre": "Consensus Cloud Solutions, Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 36,
+   "precio_entrada": 37.94
+  },
+  {
+   "ticker": "NUTX",
+   "nombre": "Nutex Health Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 39,
+   "precio_entrada": 196.53
+  },
+  {
+   "ticker": "ANF",
+   "nombre": "ABERCROMBIE & FITCH CO /DE/",
+   "entrada": "2026-07-12",
+   "rank_entrada": 40,
+   "precio_entrada": 92.42
+  },
+  {
+   "ticker": "STRA",
+   "nombre": "Strategic Education, Inc.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 43,
+   "precio_entrada": 80.98
+  },
+  {
+   "ticker": "WLY",
+   "nombre": "JOHN WILEY & SONS, INC.",
+   "entrada": "2026-07-12",
+   "rank_entrada": 46,
+   "precio_entrada": 52.76
+  }
+ ],
+ "historial": []
+}

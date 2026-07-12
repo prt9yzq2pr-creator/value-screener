@@ -15,7 +15,7 @@ echo "=== $(date) Actualizando value screener ==="
 
 python3 build_site.py
 
-git add universe_metrics.json docs/data.json ranking_completo.csv
+git add universe_metrics.json docs/data.json ranking_completo.csv cartera.json
 git commit -m "Actualizacion semanal del ranking" || { echo "Sin cambios"; exit 0; }
 git push
 
