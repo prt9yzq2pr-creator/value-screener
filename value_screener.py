@@ -599,9 +599,20 @@ class EdgarProvider(DataProvider):
             with open(path, encoding="utf-8") as f:
                 data = json.load(f)
         else:
-            data = self._get_json(self.TICKERS_URL)
-            with open(path, "w", encoding="utf-8") as f:
-                json.dump(data, f)
+            try:
+                data = self._get_json(self.TICKERS_URL)
+                with open(path, "w", encoding="utf-8") as f:
+                    json.dump(data, f)
+            except RuntimeError as e:
+                # www.sec.gov bloquea IPs de centros de datos (GitHub Actions);
+                # un mapa viejo es mejor que ninguno: los CIK apenas cambian.
+                if os.path.exists(path):
+                    print(f"[!] mapa de tickers no actualizable ({e}); "
+                          "usando copia local", file=sys.stderr)
+                    with open(path, encoding="utf-8") as f:
+                        data = json.load(f)
+                else:
+                    raise
         self._map = {}
         self._order = []
         for r in data.values():

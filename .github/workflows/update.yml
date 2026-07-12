@@ -22,6 +22,13 @@ jobs:
       - name: Instalar dependencias
         run: pip install yfinance certifi
 
+      - name: Preparar cache (mapa de tickers versionado)
+        # www.sec.gov bloquea las IPs de GitHub Actions; el mapa ticker->CIK
+        # va versionado en el repo y se siembra en la cache antes del barrido
+        run: |
+          mkdir -p .cache
+          cp edgar_company_tickers.json .cache/
+
       - name: Refrescar datos (EDGAR)
         run: python value_screener.py update --refresh 168 --rate 150 --csv ranking_completo.csv
 
