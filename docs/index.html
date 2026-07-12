@@ -21,7 +21,17 @@
   body { margin: 0; font: 15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
          background: var(--bg); color: var(--text); }
   .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start;
+         gap: 12px; flex-wrap: wrap; }
   h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  .top-links { display: flex; gap: 10px; align-items: center; }
+  .top-links a { color: var(--muted); font-size: .85rem; text-decoration: none;
+                 border-bottom: 1px dotted var(--muted); }
+  .top-links a:hover { color: var(--accent); }
+  .lang-btn { padding: 5px 12px; border: 1px solid var(--border); border-radius: 8px;
+              background: var(--card); color: var(--text); cursor: pointer;
+              font-size: .85rem; font-weight: 600; }
+  .lang-btn:hover { border-color: var(--accent); color: var(--accent); }
   .sub { color: var(--muted); font-size: .9rem; margin-bottom: 20px; }
   .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
   .tab { padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px;
@@ -56,70 +66,109 @@
   .arrow { font-size: .7rem; }
   .corta-nota { background: var(--ok-bg); border: 1px solid var(--ok); border-radius: 10px;
                 padding: 10px 14px; font-size: .86rem; margin: 0 0 14px; }
-  .disclaimer { margin-top: 18px; padding: 12px 16px; border: 1px solid var(--border);
-                border-left: 3px solid var(--bad); border-radius: 8px;
-                color: var(--muted); font-size: .8rem; max-width: 800px; }
-  .disclaimer b { color: var(--text); }
   .leyenda { margin: 0 0 14px; font-size: .86rem; color: var(--muted); }
   .leyenda summary { cursor: pointer; color: var(--accent); }
   .leyenda ul { margin: 8px 0 0; padding-left: 18px; }
   .leyenda li { margin-bottom: 4px; }
+  .disclaimer { margin-top: 18px; padding: 12px 16px; border: 1px solid var(--border);
+                border-left: 3px solid var(--bad); border-radius: 8px;
+                color: var(--muted); font-size: .8rem; max-width: 800px; }
+  .disclaimer b { color: var(--text); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Value Screener — EE.UU.</h1>
-  <div class="sub" id="sub">Cargando datos…</div>
+  <div class="top">
+    <h1 id="titulo">Value Screener — EE.UU.</h1>
+    <div class="top-links">
+      <a href="#aviso" id="avisoLink">Aviso legal</a>
+      <button class="lang-btn" id="langBtn">EN</button>
+    </div>
+  </div>
+  <div class="sub" id="sub">…</div>
 
   <div class="tabs">
-    <button class="tab on" id="tabG">General (Magic Formula)</button>
-    <button class="tab" id="tabF">Financieras</button>
-    <button class="tab" id="tabL">⭐ Lista corta</button>
+    <button class="tab on" id="tabG"></button>
+    <button class="tab" id="tabF"></button>
+    <button class="tab" id="tabL"></button>
   </div>
 
   <div class="controls">
-    <input type="search" id="q" placeholder="Buscar ticker o nombre…">
+    <input type="search" id="q">
     <select id="uni">
-      <option value="">Todos los universos</option>
-      <option value="top500">Top 500 (grandes)</option>
-      <option value="russell">Russell 2000 (small caps)</option>
+      <option value=""></option>
+      <option value="top500"></option>
+      <option value="russell"></option>
     </select>
-    <label class="chk"><input type="checkbox" id="soloAptas"> solo las que pasan filtros</label>
+    <label class="chk"><input type="checkbox" id="soloAptas"> <span id="lblSolo"></span></label>
     <span class="n" id="count"></span>
   </div>
 
-  <p class="corta-nota" id="cortaNota" style="display:none">
-    <b>Lista corta</b>: empresas que pasan todos los filtros de calidad y además cumplen
-    Piotroski ≥ 7, FCF yield &gt; 8% y EV/EBIT &lt; 10. Es el embudo más exigente del
-    screener: barato de verdad, generando caja de verdad y con fundamentales mejorando.
-    Punto de partida para el análisis manual, no una lista de compra.
-  </p>
+  <p class="corta-nota" id="cortaNota" style="display:none"></p>
 
   <details class="leyenda">
-    <summary>¿Qué significa cada columna?</summary>
-    <ul>
-      <li><b>#</b> — posición en el ranking (menor = mejor combinación de barato y rentable).</li>
-      <li><b>Capitalización</b> — lo que vale la empresa en bolsa (precio × nº de acciones). M$ = millones, MM$ = miles de millones, T$ = billones.</li>
-      <li><b>EV/EBIT</b> — precio de toda la empresa (incluyendo su deuda) dividido por su beneficio operativo anual. Cuanto más bajo, más barata. Menos de 10 suele considerarse barato.</li>
-      <li><b>ROIC</b> — rentabilidad que saca la empresa al capital que tiene invertido. Más de 15% indica buen negocio. (Con patrimonio negativo por recompras el número se distorsiona: ignóralo en esos casos.)</li>
-      <li><b>FCF yield</b> — caja libre que genera al año (cobros menos pagos e inversiones) dividida por su precio en bolsa. Es el "interés" real que rinde la empresa; más de 8% es mucho.</li>
-      <li><b>E. yield</b> — beneficio operativo dividido por el valor total de la empresa; la vara de medir de "barato" en la Magic Formula.</li>
-      <li><b>PER</b> — precio dividido por beneficio neto: cuántos años de beneficio cuesta la empresa.</li>
-      <li><b>P/B</b> — precio dividido por valor contable (lo que dice el balance que valen sus activos menos deudas).</li>
-      <li><b>DN/EBITDA</b> — deuda neta dividida por EBITDA: años de beneficio bruto que tardaría en pagar su deuda. Más de 4 es demasiada deuda.</li>
-      <li><b>Piotroski</b> — test de 9 señales de salud financiera comparando con el año anterior (beneficio, caja, deuda, márgenes...). 7-9 = mejorando; 0-4 = deteriorándose.</li>
-      <li><b>Filtros</b> — verde si pasa todos los filtros de calidad; si pone "no", pasa el ratón por encima para ver el motivo.</li>
-      <li><b>ROE</b> (financieras) — beneficio dividido por el capital de los accionistas; la rentabilidad básica de un banco o aseguradora. Más de 10-12% es bueno.</li>
-      <li><b>ROA</b> (financieras) — beneficio sobre activos totales; en banca, más de 1% es sólido.</li>
-      <li><b>Cap/Activos</b> (financieras) — colchón de capital sobre el total del balance; menos de 4% es un banco frágil.</li>
-      <li><b>Score</b> (financieras) — test propio de 6 señales: beneficio positivo, ROE &gt; 10%, ROA &gt; 0,7%, capital &gt; 5%, rentabilidad mejorando y sin diluir al accionista.</li>
-    </ul>
+    <summary id="leySum"></summary>
+    <ul id="leyBody"></ul>
   </details>
 
   <div class="tblwrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
 
-  <div class="foot">
-    <p><b>Fuente:</b> cuentas anuales oficiales presentadas a la SEC (EDGAR, XBRL) de las 500
+  <div class="foot" id="foot"></div>
+
+  <div class="disclaimer" id="aviso"></div>
+</div>
+
+<script>
+const T = {
+es: {
+  titulo: 'Value Screener — EE.UU.',
+  sub: (n, f) => `${n} empresas con métricas · actualizado ${f}`,
+  tabG: 'General (Magic Formula)', tabF: 'Financieras', tabL: '⭐ Lista corta',
+  buscar: 'Buscar ticker o nombre…',
+  uniTodos: 'Todos los universos', uniTop: 'Top 500 (grandes)', uniRus: 'Russell 2000 (small caps)',
+  solo: 'solo las que pasan filtros',
+  valores: 'valores', pasa: 'pasa', noPasa: 'no',
+  avisoLink: 'Aviso legal', leySum: '¿Qué significa cada columna?',
+  cortaNota: '<b>Lista corta</b>: empresas que pasan todos los filtros de calidad y además cumplen Piotroski ≥ 7, FCF yield &gt; 8% y EV/EBIT &lt; 10. Es el embudo más exigente del screener: barato de verdad, generando caja de verdad y con fundamentales mejorando. Punto de partida para el análisis manual, no una lista de compra.',
+  cols: { rank: '#', ticker: 'Ticker', nombre: 'Nombre', cap: 'Capitalización',
+    ev_ebit: 'EV/EBIT', roic: 'ROIC', fcf_yield: 'FCF yield', earnings_yield: 'E. yield',
+    per: 'PER', pb: 'P/B', deuda_ebitda: 'DN/EBITDA', piotroski: 'Piotroski', apta: 'Filtros',
+    roe: 'ROE', roa: 'ROA', capital_activos: 'Cap/Activos', score: 'Score' },
+  tips: {
+    rank: 'Posición en el ranking: menor = mejor combinación de barato y rentable',
+    ticker: 'Símbolo de cotización; el enlace abre su ficha en Yahoo Finance',
+    nombre: 'Nombre de la empresa',
+    cap: 'Valor en bolsa (precio × acciones). M$=millones, MM$=miles de millones, T$=billones',
+    ev_ebit: 'Precio de toda la empresa (con deuda) / beneficio operativo. Más bajo = más barata',
+    roic: 'Rentabilidad sobre el capital invertido. Más de 15% = buen negocio',
+    fcf_yield: 'Caja libre anual / precio en bolsa: el "interés" real que rinde',
+    earnings_yield: 'Beneficio operativo / valor total: la vara de "barato" de la Magic Formula',
+    per: 'Precio / beneficio neto: años de beneficio que cuesta la empresa',
+    pb: 'Precio / valor contable del patrimonio',
+    deuda_ebitda: 'Deuda neta / EBITDA: años que tardaría en pagar su deuda. Más de 4 = demasiada',
+    piotroski: 'Test de 9 señales de salud financiera vs. año anterior. 7-9 = mejorando',
+    apta: 'Pasa o no los filtros de calidad; en "no", pasa el ratón para ver el motivo',
+    roe: 'Beneficio / capital de los accionistas. Más de 10-12% es bueno en financieras',
+    roa: 'Beneficio / activos totales. En banca, más de 1% es sólido',
+    capital_activos: 'Colchón de capital sobre el balance. Menos de 4% = banco frágil',
+    score: 'Test propio de 6 señales para financieras (rentabilidad, solvencia, mejora)' },
+  leyenda: [
+    ['#', 'posición en el ranking (menor = mejor combinación de barato y rentable).'],
+    ['Capitalización', 'lo que vale la empresa en bolsa (precio × nº de acciones). M$ = millones, MM$ = miles de millones, T$ = billones.'],
+    ['EV/EBIT', 'precio de toda la empresa (incluyendo su deuda) dividido por su beneficio operativo anual. Cuanto más bajo, más barata. Menos de 10 suele considerarse barato.'],
+    ['ROIC', 'rentabilidad que saca la empresa al capital que tiene invertido. Más de 15% indica buen negocio. (Con patrimonio negativo por recompras el número se distorsiona: ignóralo en esos casos.)'],
+    ['FCF yield', 'caja libre que genera al año (cobros menos pagos e inversiones) dividida por su precio en bolsa. Es el "interés" real que rinde la empresa; más de 8% es mucho.'],
+    ['E. yield', 'beneficio operativo dividido por el valor total de la empresa; la vara de medir de "barato" en la Magic Formula.'],
+    ['PER', 'precio dividido por beneficio neto: cuántos años de beneficio cuesta la empresa.'],
+    ['P/B', 'precio dividido por valor contable (lo que dice el balance que valen sus activos menos deudas).'],
+    ['DN/EBITDA', 'deuda neta dividida por EBITDA: años de beneficio bruto que tardaría en pagar su deuda. Más de 4 es demasiada deuda.'],
+    ['Piotroski', 'test de 9 señales de salud financiera comparando con el año anterior (beneficio, caja, deuda, márgenes...). 7-9 = mejorando; 0-4 = deteriorándose.'],
+    ['Filtros', 'verde si pasa todos los filtros de calidad; si pone "no", pasa el ratón por encima para ver el motivo.'],
+    ['ROE (financieras)', 'beneficio dividido por el capital de los accionistas; la rentabilidad básica de un banco o aseguradora. Más de 10-12% es bueno.'],
+    ['ROA (financieras)', 'beneficio sobre activos totales; en banca, más de 1% es sólido.'],
+    ['Cap/Activos (financieras)', 'colchón de capital sobre el total del balance; menos de 4% es un banco frágil.'],
+    ['Score (financieras)', 'test propio de 6 señales: beneficio positivo, ROE > 10%, ROA > 0,7%, capital > 5%, rentabilidad mejorando y sin diluir al accionista.']],
+  foot: `<p><b>Fuente:</b> cuentas anuales oficiales presentadas a la SEC (EDGAR, XBRL) de las 500
     mayores cotizadas de EE.UU. más el Russell 2000. Precios de mercado de Yahoo Finance.</p>
     <p><b>General:</b> ranking Magic Formula (barato = EBIT/EV alto; rentable = retorno sobre
     capital alto). Filtros de calidad: deuda neta/EBITDA ≤ 4, cobertura de intereses ≥ 3,
@@ -127,11 +176,8 @@
     filtros: ROE ≥ 8%, capital/activos ≥ 4%, score ≥ 4/6.</p>
     <p>Una fila verde pasa todos los filtros. Esto es un embudo cuantitativo, no una
     recomendación de compra: los beneficios de pico de ciclo y las plusvalías puntuales
-    engañan a cualquier screener. Analiza antes de invertir.</p>
-  </div>
-
-  <div class="disclaimer">
-    <b>Aviso legal.</b> Esta página tiene una finalidad exclusivamente informativa y
+    engañan a cualquier screener. Analiza antes de invertir.</p>`,
+  disclaimer: `<b>Aviso legal.</b> Esta página tiene una finalidad exclusivamente informativa y
     educativa. Su contenido no constituye asesoramiento financiero, recomendación de
     inversión, oferta ni solicitud de compra o venta de valores, y su autor no es una
     empresa de servicios de inversión ni un asesor financiero autorizado. Los datos
@@ -142,73 +188,137 @@
     variable conlleva riesgo de pérdida, incluida la pérdida total del capital
     invertido. Cualquier decisión de inversión tomada a partir de esta información es
     responsabilidad exclusiva de quien la toma; antes de invertir, consulte con un
-    asesor financiero debidamente autorizado.
-  </div>
-</div>
+    asesor financiero debidamente autorizado.`,
+  cap: v => v >= 1e12 ? (v / 1e12).toFixed(2) + ' T$'
+        : v >= 1e9 ? (v / 1e9).toFixed(1) + ' MM$'
+        : (v / 1e6).toFixed(0) + ' M$',
+},
+en: {
+  titulo: 'Value Screener — USA',
+  sub: (n, f) => `${n} companies with metrics · updated ${f}`,
+  tabG: 'General (Magic Formula)', tabF: 'Financials', tabL: '⭐ Shortlist',
+  buscar: 'Search ticker or name…',
+  uniTodos: 'All universes', uniTop: 'Top 500 (large caps)', uniRus: 'Russell 2000 (small caps)',
+  solo: 'only stocks passing filters',
+  valores: 'stocks', pasa: 'pass', noPasa: 'no',
+  avisoLink: 'Legal notice', leySum: 'What does each column mean?',
+  cortaNota: '<b>Shortlist</b>: companies that pass every quality filter and additionally meet Piotroski ≥ 7, FCF yield &gt; 8% and EV/EBIT &lt; 10. It is the strictest funnel in the screener: genuinely cheap, generating real cash, with improving fundamentals. A starting point for manual analysis, not a buy list.',
+  cols: { rank: '#', ticker: 'Ticker', nombre: 'Name', cap: 'Market cap',
+    ev_ebit: 'EV/EBIT', roic: 'ROIC', fcf_yield: 'FCF yield', earnings_yield: 'E. yield',
+    per: 'P/E', pb: 'P/B', deuda_ebitda: 'ND/EBITDA', piotroski: 'Piotroski', apta: 'Filters',
+    roe: 'ROE', roa: 'ROA', capital_activos: 'Eq/Assets', score: 'Score' },
+  tips: {
+    rank: 'Ranking position: lower = better mix of cheap and profitable',
+    ticker: 'Trading symbol; the link opens its Yahoo Finance page',
+    nombre: 'Company name',
+    cap: 'Market value (price × shares outstanding)',
+    ev_ebit: 'Whole-company price (debt included) / operating profit. Lower = cheaper',
+    roic: 'Return on invested capital. Above 15% = good business',
+    fcf_yield: 'Annual free cash flow / market cap: the real "interest rate" it earns you',
+    earnings_yield: 'Operating profit / enterprise value: the Magic Formula measure of cheap',
+    per: 'Price / net income: years of earnings you pay for the company',
+    pb: 'Price / book value of equity',
+    deuda_ebitda: 'Net debt / EBITDA: years needed to repay its debt. Above 4 = too much',
+    piotroski: '9-signal financial health test vs. prior year. 7-9 = improving',
+    apta: 'Passes the quality filters or not; on "no", hover to see why',
+    roe: 'Net income / shareholders’ equity. Above 10-12% is good for financials',
+    roa: 'Net income / total assets. In banking, above 1% is solid',
+    capital_activos: 'Equity cushion over total assets. Below 4% = fragile bank',
+    score: 'In-house 6-signal test for financials (profitability, solvency, improvement)' },
+  leyenda: [
+    ['#', 'ranking position (lower = better combination of cheap and profitable).'],
+    ['Market cap', 'what the company is worth on the stock market (price × number of shares).'],
+    ['EV/EBIT', 'whole-company price (debt included) divided by annual operating profit. The lower, the cheaper. Below 10 is usually considered cheap.'],
+    ['ROIC', 'the return the company earns on the capital it has invested. Above 15% indicates a good business. (With negative equity from buybacks the figure gets distorted: ignore it in those cases.)'],
+    ['FCF yield', 'free cash generated per year (receipts minus payments and investments) divided by market price. It is the real "interest rate" the company yields; above 8% is a lot.'],
+    ['E. yield', 'operating profit divided by enterprise value; the Magic Formula’s yardstick for "cheap".'],
+    ['P/E', 'price divided by net income: how many years of earnings the company costs.'],
+    ['P/B', 'price divided by book value (what the balance sheet says its assets minus debts are worth).'],
+    ['ND/EBITDA', 'net debt divided by EBITDA: years of gross profit needed to repay its debt. Above 4 is too much debt.'],
+    ['Piotroski', '9-signal financial health test against the prior year (profit, cash, debt, margins...). 7-9 = improving; 0-4 = deteriorating.'],
+    ['Filters', 'green if it passes every quality filter; when it says "no", hover over it to see why.'],
+    ['ROE (financials)', 'net income divided by shareholders’ equity; the basic profitability of a bank or insurer. Above 10-12% is good.'],
+    ['ROA (financials)', 'net income over total assets; in banking, above 1% is solid.'],
+    ['Eq/Assets (financials)', 'equity cushion over the total balance sheet; below 4% is a fragile bank.'],
+    ['Score (financials)', 'in-house 6-signal test: positive earnings, ROE > 10%, ROA > 0.7%, equity > 5%, improving returns, no shareholder dilution.']],
+  foot: `<p><b>Source:</b> official annual filings with the SEC (EDGAR, XBRL) for the 500 largest
+    US-listed companies plus the Russell 2000. Market prices from Yahoo Finance.</p>
+    <p><b>General:</b> Magic Formula ranking (cheap = high EBIT/EV; profitable = high return on
+    capital). Quality filters: net debt/EBITDA ≤ 4, interest coverage ≥ 3, ROIC ≥ 8%,
+    positive FCF, Piotroski ≥ 5. <b>Financials:</b> ranked by P/E and ROE;
+    filters: ROE ≥ 8%, equity/assets ≥ 4%, score ≥ 4/6.</p>
+    <p>A green row passes every filter. This is a quantitative funnel, not a buy
+    recommendation: peak-cycle earnings and one-off gains fool any screener.
+    Do your analysis before investing.</p>`,
+  disclaimer: `<b>Legal notice.</b> This page is for informational and educational purposes only.
+    Its content does not constitute financial advice, an investment recommendation, or an
+    offer or solicitation to buy or sell securities, and its author is not an investment
+    firm or a licensed financial adviser. Data come from public sources (SEC EDGAR,
+    Yahoo Finance) and are processed automatically, so they may contain errors, omissions
+    or delays; no guarantee is given as to their accuracy, completeness or timeliness.
+    Metrics are computed on past results, which do not guarantee future returns.
+    Investing in equities carries risk of loss, up to the entire capital invested. Any
+    investment decision based on this information is the sole responsibility of the
+    person making it; before investing, consult a duly licensed financial adviser.`,
+  cap: v => v >= 1e12 ? '$' + (v / 1e12).toFixed(2) + 'T'
+        : v >= 1e9 ? '$' + (v / 1e9).toFixed(1) + 'B'
+        : '$' + (v / 1e6).toFixed(0) + 'M',
+},
+};
 
-<script>
+let lang = localStorage.getItem('vs_lang') || 'es';
+let DATA = null, vista = 'general', sortKey = 'rank', sortAsc = true;
+
 const PCT = v => v == null ? 'n/d' : (v * 100).toFixed(1) + '%';
 const NUM = v => v == null ? 'n/d' : v.toFixed(2);
 const INT = v => v == null ? 'n/d' : String(v);
-const CAP = v => v == null ? 'n/d'
-  : v >= 1e12 ? (v / 1e12).toFixed(2) + ' B$'.replace('B', 'T')
-  : v >= 1e9 ? (v / 1e9).toFixed(1) + ' MM$'
-  : (v / 1e6).toFixed(0) + ' M$';
+const CAP = v => v == null ? 'n/d' : T[lang].cap(v);
 
-const TIPS = {
-  rank: 'Posición en el ranking: menor = mejor combinación de barato y rentable',
-  ticker: 'Símbolo de cotización en bolsa',
-  nombre: 'Nombre de la empresa',
-  cap: 'Valor en bolsa (precio × acciones). M$=millones, MM$=miles de millones, T$=billones',
-  ev_ebit: 'Precio de toda la empresa (con deuda) / beneficio operativo. Más bajo = más barata',
-  roic: 'Rentabilidad sobre el capital invertido. Más de 15% = buen negocio',
-  fcf_yield: 'Caja libre anual / precio en bolsa: el "interés" real que rinde',
-  earnings_yield: 'Beneficio operativo / valor total: la vara de "barato" de la Magic Formula',
-  per: 'Precio / beneficio neto: años de beneficio que cuesta la empresa',
-  pb: 'Precio / valor contable del patrimonio',
-  deuda_ebitda: 'Deuda neta / EBITDA: años que tardaría en pagar su deuda. Más de 4 = demasiada',
-  piotroski: 'Test de 9 señales de salud financiera vs. año anterior. 7-9 = mejorando',
-  apta: 'Pasa o no los filtros de calidad; en "no", pasa el ratón para ver el motivo',
-  roe: 'Beneficio / capital de los accionistas. Más de 10-12% es bueno en financieras',
-  roa: 'Beneficio / activos totales. En banca, más de 1% es sólido',
-  capital_activos: 'Colchón de capital sobre el balance. Menos de 4% = banco frágil',
-  score: 'Test propio de 6 señales para financieras (rentabilidad, solvencia, mejora)',
+const COLKEYS = {
+  general: [['rank', INT], ['ticker', null], ['nombre', null], ['cap', CAP],
+    ['ev_ebit', NUM], ['roic', PCT], ['fcf_yield', PCT], ['earnings_yield', PCT],
+    ['per', NUM], ['pb', NUM], ['deuda_ebitda', NUM], ['piotroski', INT], ['apta', null]],
+  financieras: [['rank', INT], ['ticker', null], ['nombre', null], ['cap', CAP],
+    ['per', NUM], ['pb', NUM], ['roe', PCT], ['roa', PCT], ['capital_activos', PCT],
+    ['score', v => v == null ? 'n/d' : v + '/6'], ['apta', null]],
 };
-
-const COLS = {
-  general: [
-    ['rank', '#', INT], ['ticker', 'Ticker', null], ['nombre', 'Nombre', null],
-    ['cap', 'Capitalización', CAP],
-    ['ev_ebit', 'EV/EBIT', NUM], ['roic', 'ROIC', PCT], ['fcf_yield', 'FCF yield', PCT],
-    ['earnings_yield', 'E. yield', PCT], ['per', 'PER', NUM], ['pb', 'P/B', NUM],
-    ['deuda_ebitda', 'DN/EBITDA', NUM], ['piotroski', 'Piotroski', INT], ['apta', 'Filtros', null],
-  ],
-  financieras: [
-    ['rank', '#', INT], ['ticker', 'Ticker', null], ['nombre', 'Nombre', null],
-    ['cap', 'Capitalización', CAP],
-    ['per', 'PER', NUM], ['pb', 'P/B', NUM], ['roe', 'ROE', PCT], ['roa', 'ROA', PCT],
-    ['capital_activos', 'Cap/Activos', PCT], ['score', 'Score', v => v == null ? 'n/d' : v + '/6'],
-    ['apta', 'Filtros', null],
-  ],
-};
-COLS.corta = COLS.general;
+COLKEYS.corta = COLKEYS.general;
 
 const esCorta = r => r.apta && r.piotroski != null && r.piotroski >= 7 &&
                      r.fcf_yield != null && r.fcf_yield > 0.08 &&
                      r.ev_ebit != null && r.ev_ebit < 10;
 
-let DATA = null, vista = 'general', sortKey = 'rank', sortAsc = true;
+function applyLang() {
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.getElementById('titulo').textContent = t.titulo;
+  document.getElementById('avisoLink').textContent = t.avisoLink;
+  document.getElementById('langBtn').textContent = lang === 'es' ? 'EN' : 'ES';
+  document.getElementById('tabG').textContent = t.tabG;
+  document.getElementById('tabF').textContent = t.tabF;
+  document.getElementById('tabL').textContent = t.tabL;
+  document.getElementById('q').placeholder = t.buscar;
+  const opts = document.getElementById('uni').options;
+  opts[0].text = t.uniTodos; opts[1].text = t.uniTop; opts[2].text = t.uniRus;
+  document.getElementById('lblSolo').textContent = t.solo;
+  document.getElementById('cortaNota').innerHTML = t.cortaNota;
+  document.getElementById('leySum').textContent = t.leySum;
+  document.getElementById('leyBody').innerHTML =
+    t.leyenda.map(([k, d]) => `<li><b>${k}</b> — ${d}</li>`).join('');
+  document.getElementById('foot').innerHTML = t.foot;
+  document.getElementById('aviso').innerHTML = t.disclaimer;
+  if (DATA) {
+    document.getElementById('sub').textContent = t.sub(DATA.n_metricas, DATA.generado);
+    render();
+  }
+}
 
-fetch('data.json').then(r => r.json()).then(d => {
-  DATA = d;
-  document.getElementById('sub').textContent =
-    `${d.n_metricas} empresas con métricas · actualizado ${d.generado}`;
-  render();
-});
+fetch('data.json').then(r => r.json()).then(d => { DATA = d; applyLang(); });
 
 function render() {
   if (!DATA) return;
-  const cols = COLS[vista];
+  const t = T[lang];
+  const cols = COLKEYS[vista];
   const q = document.getElementById('q').value.trim().toLowerCase();
   const solo = document.getElementById('soloAptas').checked;
   const uni = document.getElementById('uni').value;
@@ -228,8 +338,8 @@ function render() {
   });
 
   const thead = document.querySelector('#tbl thead');
-  thead.innerHTML = '<tr>' + cols.map(([k, lbl]) =>
-    `<th data-k="${k}" title="${TIPS[k] || ''}">${lbl}${k === sortKey ? `<span class="arrow"> ${sortAsc ? '▲' : '▼'}</span>` : ''}</th>`
+  thead.innerHTML = '<tr>' + cols.map(([k]) =>
+    `<th data-k="${k}" title="${t.tips[k] || ''}">${t.cols[k]}${k === sortKey ? `<span class="arrow"> ${sortAsc ? '▲' : '▼'}</span>` : ''}</th>`
   ).join('') + '</tr>';
   thead.querySelectorAll('th').forEach(th => th.onclick = () => {
     const k = th.dataset.k;
@@ -239,18 +349,23 @@ function render() {
 
   const tbody = document.querySelector('#tbl tbody');
   tbody.innerHTML = rows.map(r => '<tr class="' + (r.apta ? 'apta' : '') + '">' +
-    cols.map(([k, , fmt]) => {
+    cols.map(([k, fmt]) => {
       if (k === 'ticker') return `<td class="tk"><a href="https://finance.yahoo.com/quote/${encodeURIComponent(r.ticker)}" target="_blank" rel="noopener">${r.ticker}</a></td>`;
       if (k === 'nombre') return `<td class="nm" title="${r.nombre}">${r.nombre}</td>`;
       if (k === 'apta') return r.apta
-        ? '<td style="text-align:center"><span class="badge si">pasa</span></td>'
-        : `<td style="text-align:center"><span class="badge no" title="${(r.razones || []).join('; ')}">no</span></td>`;
+        ? `<td style="text-align:center"><span class="badge si">${t.pasa}</span></td>`
+        : `<td style="text-align:center"><span class="badge no" title="${(r.razones || []).join('; ')}">${t.noPasa}</span></td>`;
       return `<td>${fmt(r[k])}</td>`;
     }).join('') + '</tr>').join('');
 
-  document.getElementById('count').textContent = `${rows.length} valores`;
+  document.getElementById('count').textContent = `${rows.length} ${t.valores}`;
 }
 
+document.getElementById('langBtn').onclick = () => {
+  lang = lang === 'es' ? 'en' : 'es';
+  localStorage.setItem('vs_lang', lang);
+  applyLang();
+};
 document.getElementById('tabG').onclick = () => setVista('general');
 document.getElementById('tabF').onclick = () => setVista('financieras');
 document.getElementById('tabL').onclick = () => setVista('corta');
@@ -265,6 +380,8 @@ function setVista(v) {
 document.getElementById('q').oninput = render;
 document.getElementById('soloAptas').onchange = render;
 document.getElementById('uni').onchange = render;
+
+applyLang();
 </script>
 </body>
 </html>
