@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Value Screener — Ranking EE.UU.</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1a1d21; --muted: #6b7280;
+    --border: #e2e5e9; --accent: #1a56db; --ok: #047857; --ok-bg: #ecfdf5;
+    --bad: #b91c1c; --head: #f0f2f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111418; --card: #1a1f26; --text: #e5e7eb; --muted: #9ca3af;
+      --border: #2a313b; --accent: #60a5fa; --ok: #34d399; --ok-bg: #0c2921;
+      --bad: #f87171; --head: #20262e;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: .9rem; margin-bottom: 20px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tab { padding: 8px 16px; border: 1px solid var(--border); border-radius: 8px;
+         background: var(--card); cursor: pointer; font-size: .95rem; color: var(--text); }
+  .tab.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .controls { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  input[type=search] { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+         background: var(--card); color: var(--text); width: 260px; max-width: 100%; }
+  label.chk { display: flex; gap: 6px; align-items: center; color: var(--muted); cursor: pointer; }
+  .n { color: var(--muted); font-size: .85rem; margin-left: auto; }
+  .tblwrap { overflow-x: auto; background: var(--card); border: 1px solid var(--border);
+             border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: .88rem; }
+  th, td { padding: 7px 10px; text-align: right; white-space: nowrap; }
+  th:nth-child(2), td:nth-child(2), th:nth-child(3), td:nth-child(3) { text-align: left; }
+  thead th { background: var(--head); position: sticky; top: 0; cursor: pointer;
+             user-select: none; border-bottom: 1px solid var(--border); }
+  thead th:hover { color: var(--accent); }
+  tbody tr { border-top: 1px solid var(--border); }
+  tbody tr.apta { background: var(--ok-bg); }
+  td.tk { font-weight: 600; }
+  td.nm { max-width: 240px; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+  .badge { font-size: .78rem; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .badge.si { color: var(--ok); background: transparent; border: 1px solid var(--ok); }
+  .badge.no { color: var(--bad); opacity: .8; }
+  .foot { margin-top: 22px; color: var(--muted); font-size: .82rem; max-width: 800px; }
+  .foot b { color: var(--text); }
+  .arrow { font-size: .7rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Value Screener — EE.UU.</h1>
+  <div class="sub" id="sub">Cargando datos…</div>
+
+  <div class="tabs">
+    <button class="tab on" id="tabG">General (Magic Formula)</button>
+    <button class="tab" id="tabF">Financieras</button>
+  </div>
+
+  <div class="controls">
+    <input type="search" id="q" placeholder="Buscar ticker o nombre…">
+    <label class="chk"><input type="checkbox" id="soloAptas"> solo las que pasan filtros</label>
+    <span class="n" id="count"></span>
+  </div>
+
+  <div class="tblwrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+
+  <div class="foot">
+    <p><b>Fuente:</b> cuentas anuales oficiales presentadas a la SEC (EDGAR, XBRL) de las 500
+    mayores cotizadas de EE.UU. más el Russell 2000. Precios de mercado de Yahoo Finance.</p>
+    <p><b>General:</b> ranking Magic Formula (barato = EBIT/EV alto; rentable = retorno sobre
+    capital alto). Filtros de calidad: deuda neta/EBITDA ≤ 4, cobertura de intereses ≥ 3,
+    ROIC ≥ 8%, FCF positivo, Piotroski ≥ 5. <b>Financieras:</b> ranking por PER y ROE;
+    filtros: ROE ≥ 8%, capital/activos ≥ 4%, score ≥ 4/6.</p>
+    <p>Una fila verde pasa todos los filtros. Esto es un embudo cuantitativo, no una
+    recomendación de compra: los beneficios de pico de ciclo y las plusvalías puntuales
+    engañan a cualquier screener. Analiza antes de invertir.</p>
+  </div>
+</div>
+
+<script>
+const PCT = v => v == null ? 'n/d' : (v * 100).toFixed(1) + '%';
+const NUM = v => v == null ? 'n/d' : v.toFixed(2);
+const INT = v => v == null ? 'n/d' : String(v);
+
+const COLS = {
+  general: [
+    ['rank', '#', INT], ['ticker', 'Ticker', null], ['nombre', 'Nombre', null],
+    ['ev_ebit', 'EV/EBIT', NUM], ['roic', 'ROIC', PCT], ['fcf_yield', 'FCF yield', PCT],
+    ['earnings_yield', 'E. yield', PCT], ['per', 'PER', NUM], ['pb', 'P/B', NUM],
+    ['deuda_ebitda', 'DN/EBITDA', NUM], ['piotroski', 'Piotroski', INT], ['apta', 'Filtros', null],
+  ],
+  financieras: [
+    ['rank', '#', INT], ['ticker', 'Ticker', null], ['nombre', 'Nombre', null],
+    ['per', 'PER', NUM], ['pb', 'P/B', NUM], ['roe', 'ROE', PCT], ['roa', 'ROA', PCT],
+    ['capital_activos', 'Cap/Activos', PCT], ['score', 'Score', v => v == null ? 'n/d' : v + '/6'],
+    ['apta', 'Filtros', null],
+  ],
+};
+
+let DATA = null, vista = 'general', sortKey = 'rank', sortAsc = true;
+
+fetch('data.json').then(r => r.json()).then(d => {
+  DATA = d;
+  document.getElementById('sub').textContent =
+    `${d.n_metricas} empresas con métricas · actualizado ${d.generado}`;
+  render();
+});
+
+function render() {
+  if (!DATA) return;
+  const cols = COLS[vista];
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const solo = document.getElementById('soloAptas').checked;
+
+  let rows = DATA[vista].filter(r =>
+    (!solo || r.apta) &&
+    (!q || r.ticker.toLowerCase().includes(q) || r.nombre.toLowerCase().includes(q)));
+
+  rows.sort((a, b) => {
+    const x = a[sortKey], y = b[sortKey];
+    if (x == null) return 1;
+    if (y == null) return -1;
+    const c = typeof x === 'string' ? x.localeCompare(y) : x - y;
+    return sortAsc ? c : -c;
+  });
+
+  const thead = document.querySelector('#tbl thead');
+  thead.innerHTML = '<tr>' + cols.map(([k, lbl]) =>
+    `<th data-k="${k}">${lbl}${k === sortKey ? `<span class="arrow"> ${sortAsc ? '▲' : '▼'}</span>` : ''}</th>`
+  ).join('') + '</tr>';
+  thead.querySelectorAll('th').forEach(th => th.onclick = () => {
+    const k = th.dataset.k;
+    if (sortKey === k) sortAsc = !sortAsc; else { sortKey = k; sortAsc = true; }
+    render();
+  });
+
+  const tbody = document.querySelector('#tbl tbody');
+  tbody.innerHTML = rows.map(r => '<tr class="' + (r.apta ? 'apta' : '') + '">' +
+    cols.map(([k, , fmt]) => {
+      if (k === 'ticker') return `<td class="tk">${r.ticker}</td>`;
+      if (k === 'nombre') return `<td class="nm" title="${r.nombre}">${r.nombre}</td>`;
+      if (k === 'apta') return r.apta
+        ? '<td style="text-align:center"><span class="badge si">pasa</span></td>'
+        : `<td style="text-align:center"><span class="badge no" title="${(r.razones || []).join('; ')}">no</span></td>`;
+      return `<td>${fmt(r[k])}</td>`;
+    }).join('') + '</tr>').join('');
+
+  document.getElementById('count').textContent = `${rows.length} valores`;
+}
+
+document.getElementById('tabG').onclick = () => setVista('general');
+document.getElementById('tabF').onclick = () => setVista('financieras');
+function setVista(v) {
+  vista = v; sortKey = 'rank'; sortAsc = true;
+  document.getElementById('tabG').classList.toggle('on', v === 'general');
+  document.getElementById('tabF').classList.toggle('on', v === 'financieras');
+  render();
+}
+document.getElementById('q').oninput = render;
+document.getElementById('soloAptas').onchange = render;
+</script>
+</body>
+</html>
